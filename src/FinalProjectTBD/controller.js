@@ -92,7 +92,7 @@ const deleteGenre = (req, res) => {
     });
 };
 
-//add branch
+//update genre
 const updateGenre = (req, res) => {
     const id = parseInt(req.params.id);
     const { genreName } = req.body;
@@ -115,7 +115,7 @@ const updateGenre = (req, res) => {
     });
 };
 
-//add branch
+//add branch TCL
 const addBranch = async (req, res) => {
     const { location } = req.body;
 
@@ -236,6 +236,68 @@ const getBooks = (req, res) => {
     });
 };
 
+const buildQuery = (req, res) => {
+    const { filters, sort, limit, offset } = req.body;
+    // Query base
+    let query = 'SELECT * FROM "Book"';
+    let queryParams = [];
+    let queryConditions = [];
+  
+    // Filters Query
+    if (filters) {
+        Object.keys(filters).forEach((key, index) => {
+            if (typeof filters[key] === "object") {
+            Object.keys(filters[key]).forEach((condition) => {
+                let paramIndex = queryParams.length + 1;
+                switch (condition) {
+                case "gte":
+                    queryConditions.push(`"${key}" >= $${paramIndex}`);
+                    queryParams.push(filters[key][condition]);
+                    break;
+                case "lte":
+                    queryConditions.push(`"${key}" <= $${paramIndex}`);
+                    queryParams.push(filters[key][condition]);
+                    break;
+                }
+            });
+        } else {
+            let paramIndex = queryParams.length + 1;
+            queryConditions.push(`"${key}" = $${paramIndex}`);
+            queryParams.push(filters[key]);
+            }
+        });
+    }
+  
+    // Combine conditions with WHERE clause
+    if (queryConditions.length > 0) {
+        query += ` WHERE ${queryConditions.join(" AND ")}`;
+    }
+  
+    // Sort Query
+    if (sort) {
+        query += ` ORDER BY "${sort.column}" ${sort.direction}`;
+    }
+  
+    // Limit Query
+    if (limit) {
+        queryParams.push(limit);
+        query += ` LIMIT $${queryParams.length}`;
+    }
+  
+    // Offset Query
+    if (offset) {
+      queryParams.push(offset);
+      query += ` OFFSET $${queryParams.length}`;
+    }
+  
+    // Execute the Built Query
+    pool.query(query, queryParams, (error, results) => {
+      if (error) throw error;
+      res.status(200).json(results.rows);
+    });
+};
+
+
 module.exports = {
     getGenre,
     getGenreById,
@@ -248,4 +310,5 @@ module.exports = {
     getBooks,
     getBranch,
     getStaff,
+    buildQuery,
 };

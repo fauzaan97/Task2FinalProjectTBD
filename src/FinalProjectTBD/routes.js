@@ -10,11 +10,13 @@ router.get('/books/', controller.getBooks);
 router.get('/branch/', controller.getBranch);
 router.get('/staff/', controller.getStaff);
 
+
 //POST route
 router.post('/genre/', controller.addGenre);
 router.post('/branch/', controller.addBranch);
 router.post('/staff/', controller.addStaff);
 router.post('/books/', controller.addBook);
+router.post('/book-query/', controller.buildQuery);
 
 //DELETE route
 router.delete('/genre/:id', controller.deleteGenre);
