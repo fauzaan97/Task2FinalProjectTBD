@@ -10,6 +10,9 @@ const checkStaffExist = 'SELECT s FROM "Staff" s WHERE "staffName" = $1';
 const addStaff = 'INSERT INTO "Staff" ("staffName","salary","position", "branchID") VALUES ($1, $2, $3, $4)';
 const addBook = 'INSERT INTO "Book" ("bookName","publicationYear","pages","bookPrice","publisherName","languageID","genreID") VALUES ($1, $2, $3, $4)';
 const getBooks = 'SELECT * FROM "Book"';
+const getBranch = 'SELECT * FROM branch';
+const getStaff = 'SELECT * FROM "Staff"';
+
 
 module.exports = {
     getGenre,
@@ -23,5 +26,7 @@ module.exports = {
     checkStaffExist,
     addStaff,
     addBook,
-    getBooks
+    getBooks,
+    getBranch,
+    getStaff,
 };

@@ -116,21 +116,39 @@ const updateGenre = (req, res) => {
 };
 
 //add branch
-const addBranch = (req, res) => {
+const addBranch = async (req, res) => {
     const { location } = req.body;
 
-    pool.query(queries.checkBranchExist, [location], (error, results) => {
-        if (results.rows.length) {
-            res.send("Branch already exist");
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        const checkBranchExistResult = await client.query(queries.checkBranchExist, [location]);
+        
+        if (checkBranchExistResult.rows.length) {
+            res.send("Branch already exists");
+        } else {
+            await client.query(queries.addBranch, [location]);
+            await client.query('COMMIT');
+            res.status(201).send(`Branch added successfully`);
         }
-        else {
-            //add branch to db
-            pool.query(queries.addBranch, [location], (error, results) => {
-                if (error) {
-                    throw error;
-                }
-                res.status(201).send(`Branch added successfully`);
-            });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
+};
+
+
+//get branch
+const getBranch = (req, res) => {
+    pool.query(queries.getBranch, (error, results) => {
+        if (error) {
+            throw error;
+        }
+        else{
+            res.status(200).json(results.rows);
         }
     });
 };
@@ -156,6 +174,18 @@ const addStaff = (req, res) => {
                 }
                 res.status(201).send('Staff added successfully');
             });
+        }
+    });
+};
+
+//get staff
+const getStaff = (req, res) => {
+    pool.query(queries.getStaff, (error, results) => {
+        if (error) {
+            throw error;
+        }
+        else{
+            res.status(200).json(results.rows);
         }
     });
 };
@@ -216,4 +246,6 @@ module.exports = {
     addStaff,
     addBook,
     getBooks,
+    getBranch,
+    getStaff,
 };

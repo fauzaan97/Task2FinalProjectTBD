@@ -7,6 +7,8 @@ const router = Router();
 router.get('/genre/', controller.getGenre);
 router.get('/genre/:id', controller.getGenreById);
 router.get('/books/', controller.getBooks);
+router.get('/branch/', controller.getBranch);
+router.get('/staff/', controller.getStaff);
 
 //POST route
 router.post('/genre/', controller.addGenre);
