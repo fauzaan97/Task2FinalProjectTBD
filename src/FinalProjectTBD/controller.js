@@ -2,14 +2,35 @@ const pool = require('../../db');
 const queries = require('./queries');
 
 //get genre
-const getGenre = (req,res) => {
-    pool.query(queries.getGenre, (error, results) => {
-        if (error) {
-            throw error;
-        }
-        else{
-            res.status(200).json(results.rows);
-        }
+const getGenre = (req, res) => {
+    pool.connect((err, client, done) => {
+        if (err) throw err;
+
+        client.query('BEGIN', (err) => {
+            if (err) {
+                done();
+                throw err;
+            }
+
+            client.query(queries.getGenre, (err, results) => {
+                if (err) {
+                    client.query('ROLLBACK', (err) => {
+                        if (err) {
+                            done();
+                        }
+                    });
+                    throw err;
+                }
+
+                client.query('COMMIT', (err) => {
+                    done();
+                    if (err) {
+                        throw err;
+                    }
+                    res.status(200).json(results.rows);
+                });
+            });
+        });
     });
 };
 
